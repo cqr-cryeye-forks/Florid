@@ -3,10 +3,13 @@ from __future__ import print_function
 import datetime
 import glob
 import optparse
+import pathlib
 import re
 import signal
 import threading
 import core.initializer
+from settings import ROOT_PATH
+
 core.initializer.Initializer().init()
 import lib.common
 import lib.colorprint
@@ -54,12 +57,22 @@ def florid_get_parse():
 
 def florid_init(options):
     lib.common.SOURCE_URL = lib.urlentity.URLEntity(options.url).get_url()
-    for __file_name in glob.glob('module/phase_one/*.py'):
+
+    modules_path_phase_one: pathlib.Path = ROOT_PATH.joinpath("module/phase_one")
+    modules_path_phase_two: pathlib.Path = ROOT_PATH.joinpath("module/phase_two")
+    for __file_name in modules_path_phase_one.iterdir():
+    # for __file_name in glob.glob('module/phase_one/*.py'):
+        name_of_file: str = str(__file_name)
+        __file_name = name_of_file
         if '__init__' not in __file_name and 'pyc' not in __file_name:
             lib.common.MODULE_ONE_NAME_LIST.append(
                 re.findall('.*(/|\\\\)(.+)\.py$', __file_name)[0][1])
+
     if options.modules.lower() == 'all':
-        for __file_name in glob.glob('module/phase_two/*.py'):
+
+        for __file_name in modules_path_phase_two.iterdir():
+            name_of_file: str = str(__file_name)
+            __file_name = name_of_file
             if '__init__' not in __file_name and 'pyc' not in __file_name:
                 lib.common.MODULE_NAME_LIST.append(
                     re.findall('.*(/|\\\\)(.+)\.py$', __file_name)[0][1])

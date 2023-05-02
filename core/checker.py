@@ -7,6 +7,7 @@ import pathlib
 import config.config
 import lib.colorprint
 import lib.common
+from settings import ROOT_PATH
 
 
 class Checker(object):
@@ -117,7 +118,6 @@ class ResultPrinter(object):
         if lib.common.FLAG['stop_signal']:
             lib.colorprint.color().yellow('[!] User abort. Results may be not completed.')
 
-        root_path = pathlib.Path(__file__).parent.parent
-        file_path = root_path.joinpath("result.json")
+        file_path = ROOT_PATH.joinpath("result.json")
         file_path.write_text(json.dumps(ResultPrinter.FINAL_RESULT))
         lib.common.FLAG['scan_done'] = True
