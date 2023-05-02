@@ -1,7 +1,9 @@
+from __future__ import absolute_import
 import threading
 
 import lib.common
 import lib.urlentity
+from six.moves import filter
 
 MODULE_NAME = 'sensi-dir'
 
@@ -25,9 +27,9 @@ def run(url):
     target_url_list = list([target_url])
 
     if url_obj.is_file():
-        path_section_list = filter(lambda x: x != '', url_obj.get_path().split('/'))[:-1]
+        path_section_list = [x for x in url_obj.get_path().split('/') if x != ''][:-1]
     else:
-        path_section_list = filter(lambda x: x != '', url_obj.get_path().split('/'))
+        path_section_list = [x for x in url_obj.get_path().split('/') if x != '']
     for path_section in path_section_list:
         target_url += (path_section + '/')
         target_url_list.append(target_url)

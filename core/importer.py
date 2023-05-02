@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import lib.colorprint
 import lib.common
 
@@ -12,12 +14,12 @@ class Importer(object):
                 __module_obj = __import__('module.phase_one.' + __module_name, fromlist=['*.py'])
                 lib.common.MODULE_ONE_OBJ_DICT[__module_name] = __module_obj
                 lib.common.ALIVE_LINE[__module_name] = 0
-            except Exception, e:
+            except Exception as e:
                 lib.colorprint.color().red(str(e))
 
     def import_two(self):
         for __module_name in lib.common.MODULE_NAME_LIST:
-            print '*', __module_name.ljust(40, '.'),
+            print('*', __module_name.ljust(40, '.'), end=' ')
             try:
                 __module_obj = __import__('module.phase_two.' + __module_name, fromlist=['*.py'])
                 lib.common.MODULE_OBJ_DICT[__module_name] = __module_obj
@@ -25,10 +27,10 @@ class Importer(object):
                 lib.common.ALIVE_LINE[__module_name] = 0
                 __module_obj.init()
                 lib.colorprint.color().green('SUCCESS')
-            except Exception, e:
+            except Exception as e:
                 lib.common.MODULE_NAME_LIST.remove(__module_name)
                 lib.colorprint.color().red(str(e))
-        print
+        print()
 
     def do_import(self):
         lib.colorprint.color().blue('[*] Importing Modules')

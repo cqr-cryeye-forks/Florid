@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import threading
 
 import lib.common
@@ -21,8 +23,8 @@ def __download(url_obj, suffix):
             try:
                 __file = open('log/' + url_obj.get_hostname() + '/' + url_obj.get_file() + suffix, 'w')
                 __file.writelines(resp.content)
-            except Exception, e:
-                print 'Fail to download backup file', e
+            except Exception as e:
+                print('Fail to download backup file', e)
                 pass  # Fail to write files.
 
 

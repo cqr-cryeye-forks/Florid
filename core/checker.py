@@ -1,3 +1,9 @@
+from __future__ import absolute_import
+from __future__ import print_function
+
+import json
+import pathlib
+
 import config.config
 import lib.colorprint
 import lib.common
@@ -30,11 +36,14 @@ class Checker(object):
 
 
 class ResultPrinter(object):
+    FINAL_RESULT = []
+
     def __init__(self):
         self.all_module_list = lib.common.MODULE_NAME_LIST
         self.phase_one_printed = False
 
     def run(self):
+
         # Do checking while modules left to be executed.
         while len(self.all_module_list) != 0:
 
@@ -59,12 +68,27 @@ class ResultPrinter(object):
                         lib.colorprint.color().sky_blue('[====\t' + 'Site Info'.ljust(14) + '====]')
 
                         longest_key = 0
+                        Site_Info = lib.common.RESULT_ONE_DICT
+                        if "Ip Addr" not in Site_Info:
+                            Site_Info.update({"Ip Addr": "Not defined"})
+                        if "IP Info" not in Site_Info:
+                            Site_Info.update({"IP Info": "Not defined"})
+                        if "X-Powered-By" not in Site_Info:
+                            Site_Info.update({"X-Powered-By": "Not defined"})
+                        if "Server" not in Site_Info:
+                            Site_Info.update({"Server": "Not defined"})
+
+                        # NEW
+                        ResultPrinter.FINAL_RESULT.append({
+                            "Site_Info": Site_Info,
+                        })
+
                         for __key in lib.common.RESULT_ONE_DICT:
                             longest_key = max(longest_key, len(__key))
                         for __key in lib.common.RESULT_ONE_DICT:
-                            print (__key + ': ').ljust(longest_key + 2) + lib.common.RESULT_ONE_DICT[__key]
+                            print((__key + ': ').ljust(longest_key + 2) + lib.common.RESULT_ONE_DICT[__key])
                         self.phase_one_printed = True
-                        print
+                        print()
 
                 # The printing process for modules in phase one is completed.
                 # Now it's time to print the results for modules in phase two.
@@ -77,10 +101,23 @@ class ResultPrinter(object):
                             # Result of the certain module has been printed.
                             # Remove this module from the list.
 
+                            # NEW
+                            # tests_info = lib.common.RESULT_DICT
+                            # ResultPrinter.FINAL_RESULT.append(tests_info)
+                            x = 1
+                            context = lib.common.RESULT_DICT[__module_name]
+                            ResultPrinter.FINAL_RESULT.append({
+                                "module_name": __module_name,
+                                "files": context,
+                            })
                             for item in lib.common.RESULT_DICT[__module_name]:
                                 lib.colorprint.color().green('\t> ' + item)
-                            print
+                            print()
 
         if lib.common.FLAG['stop_signal']:
             lib.colorprint.color().yellow('[!] User abort. Results may be not completed.')
+
+        root_path = pathlib.Path(__file__).parent.parent
+        file_path = root_path.joinpath("result.json")
+        file_path.write_text(json.dumps(ResultPrinter.FINAL_RESULT))
         lib.common.FLAG['scan_done'] = True

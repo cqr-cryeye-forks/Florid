@@ -1,9 +1,12 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import imp
 import os
 import platform
 import time
 
 import lib.common
+from six.moves import input
 
 NEEDED_MODULES = ['requests', 'bs4']
 
@@ -26,10 +29,10 @@ class Initializer:
             except ImportError:
                 self.__uninstalled_modules_list.append(needed_module)
         if len(self.__uninstalled_modules_list) > 0:
-            print '[!] Some necessary modules are needed:'
+            print('[!] Some necessary modules are needed:')
             for needed_module in self.__uninstalled_modules_list:
-                print '\t* %s' % needed_module
-            raw_input('Press [Enter] to install them.')
+                print('\t* %s' % needed_module)
+            input('Press [Enter] to install them.')
             for needed_module in self.__uninstalled_modules_list:
                 os.system('pip install %s' % needed_module)
             if lib.common.CONFIG['OS_type'] == 'WIN':

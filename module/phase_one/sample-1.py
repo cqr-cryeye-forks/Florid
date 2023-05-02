@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import lib.common
 
 MODULE_NAME = 'sample-1'

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import threading
 
 import lib.common
@@ -28,7 +29,7 @@ def run(url):
     target_url = url_obj.get_hostname() + ':' + str(url_obj.get_port()) + '/'
     target_url_list = list([])
     if not url_obj.is_file():
-        path_section_list = filter(lambda x: x != '', url_obj.get_path().split('/'))
+        path_section_list = [x for x in url_obj.get_path().split('/') if x != '']
         for path_section in path_section_list:
             target_url += (path_section + '/')
             target_url_list.append(target_url)

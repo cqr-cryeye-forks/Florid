@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import re
 import time
 
@@ -24,7 +26,7 @@ class URLEntity:
         # Result: https
         try:
             self.__scheme = re.findall('^([a-zA-Z]*)://', self.__url)[0]
-        except IndexError, SchemeNotFound:
+        except IndexError as SchemeNotFound:
             self.__scheme = 'http'
             self.__url = self.__scheme + '://' + self.__url
 
@@ -32,15 +34,15 @@ class URLEntity:
         # Result: example.com
         try:
             self.__host = re.findall('^[a-zA-Z]+://([^/:]+)', self.__url)[0]
-        except IndexError, HostnameNotFound:
+        except IndexError as HostnameNotFound:
             self.__host = ''
-            print HostnameNotFound
+            print(HostnameNotFound)
 
         # To match port
         # Result: 443
         try:
             self.__port = int(re.findall('^[a-zA-Z]+://[^:]+:([0-9]+)/', self.__url)[0])
-        except IndexError, PortNotFound:
+        except IndexError as PortNotFound:
             self.__port = 80
 
         # To format the url
@@ -52,14 +54,14 @@ class URLEntity:
         # Result: file.php
         try:
             self.__file = re.findall('^[a-zA-Z]+://[^?]*/([^/?]*)?', self.__url)[0]
-        except IndexError, FileNotFound:
+        except IndexError as FileNotFound:
             self.__file = ''
 
         # To match source
         # Result: https://example.com:443/
         try:
             self.__source = re.findall('^([a-zA-Z]+://[^/]+/)', self.__url)[0]
-        except IndexError, SourceNotFound:
+        except IndexError as SourceNotFound:
             self.__source = re.findall('^([a-zA-Z]+://[^:/]+)/', self.__url)[0]
 
         # To match path
@@ -67,14 +69,14 @@ class URLEntity:
         try:
             self.__path = re.findall('^[a-zA-Z]+://[^/]+([^?]*)', self.__url)[0]
             self.__path = self.__path.replace(self.__file, '')
-        except IndexError, PathNotFound:
+        except IndexError as PathNotFound:
             self.__path = '/'
 
         # To match query
         # Result: key=value
         try:
             self.__query = re.findall('\?(.+)', self.__url)[0]
-        except IndexError, QueryNotFound:
+        except IndexError as QueryNotFound:
             self.__query = ''
 
         # To match url type
@@ -121,7 +123,7 @@ class URLEntity:
             self.__response = requests.get(url=self.__url,
                                            headers=config.config.config['request_headers'],
                                            timeout=timeout)
-        except Exception, e:
+        except Exception as e:
             # print e
             self.__response = None
         return self.__response
@@ -167,9 +169,9 @@ if __name__ == '__main__':
     test_case.append('floridhazel.com')
     for url in test_case:
         url_entity = URLEntity(raw_url=url)
-        print url
+        print(url)
         import pprint
 
         # url_entity.make_get_request()
         pprint.pprint(url_entity.__dict__)
-        print
+        print()

@@ -1,15 +1,13 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import datetime
 import glob
 import optparse
 import re
 import signal
-import sys
 import threading
-
 import core.initializer
-
 core.initializer.Initializer().init()
-
 import lib.common
 import lib.colorprint
 import lib.processbar
@@ -18,9 +16,6 @@ import core.importer
 import core.producer
 import core.consumer
 import core.checker
-
-reload(sys)
-sys.setdefaultencoding('utf8')
 
 florid_banner = {
     'version': '3.2.4',
@@ -36,11 +31,11 @@ florid_banner = {
 
 def florid_show_banner():
     lib.colorprint.color().pink(florid_banner['logo'])
-    print '[Florid Version] ' + florid_banner['version']
-    print '[Last Updated] ' + florid_banner['update']
-    print '[*] ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print '\nPress [Ctrl+C] to abort the scan'
-    print '\n'
+    print('[Florid Version] ' + florid_banner['version'])
+    print('[Last Updated] ' + florid_banner['update'])
+    print('[*] ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    print('\nPress [Ctrl+C] to abort the scan')
+    print('\n')
 
 
 def florid_get_parse():
@@ -79,18 +74,18 @@ def florid_organize():
 
     tasks = list([])
     # tasks.append(threading.Thread(target=lib.processbar.run, args=()))
-    tasks.append(threading.Thread(target=core.producer.Producer(lib.common.SOURCE_URL).run, args=()))
-    tasks.append(threading.Thread(target=core.consumer.Consumer().run, args=()))
-    tasks.append(threading.Thread(target=core.checker.ResultPrinter().run, args=()))
+    tasks.append(threading.Thread(target=core.producer.Producer(lib.common.SOURCE_URL).run, args=(), daemon=True))
+    tasks.append(threading.Thread(target=core.consumer.Consumer().run, args=(), daemon=True))
+    tasks.append(threading.Thread(target=core.checker.ResultPrinter().run, args=(), daemon=True))
 
     for __task in tasks:
-        __task.setDaemon(True)
+        # __task.setDaemon(True)
         __task.start()
     while not lib.common.FLAG['scan_done']:
         alive = False
         if lib.common.FLAG['stop_signal']:
             for t in tasks:
-                alive = alive or t.isAlive()
+                alive = alive or t.is_alive()
             if not alive:
                 break
 

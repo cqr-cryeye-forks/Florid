@@ -1,5 +1,7 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import os
-import urlparse
+import six.moves.urllib.parse
 
 import bs4
 import requests
@@ -20,14 +22,14 @@ class Producer(object):
         if not os.path.exists(lib.common.CONFIG['project_path'] + '/log/' + self.__source_url_obj.get_hostname()):
             try:
                 os.makedirs(lib.common.CONFIG['project_path'] + '/log/' + self.__source_url_obj.get_hostname())
-            except Exception, e:
-                print 'Creating Log File Fail.'
+            except Exception as e:
+                print('Creating Log File Fail.')
         self.log_fp = open(
             lib.common.CONFIG['project_path'] + '/log/' + self.__source_url_obj.get_hostname() + '/urllist.txt', 'w+')
 
     def __find_joint(self, soup, tags, attribute):
         for tag in soup.find_all(tags):
-            url_new = urlparse.urljoin(self.__source_url_obj.get_url(), tag.get(attribute))
+            url_new = six.moves.urllib.parse.urljoin(self.__source_url_obj.get_url(), tag.get(attribute))
             url_new_obj = lib.urlentity.URLEntity(url_new)
             if url_new_obj.get_url() not in self.crawled_list and url_new_obj.get_hostname() == self.__source_url_obj.get_hostname() and '#' not in url_new_obj.get_url():
                 self.waiting_list.append(url_new_obj.get_url())
@@ -38,21 +40,28 @@ class Producer(object):
         while not lib.common.FLAG['producer_done']:
             if lib.common.FLAG['stop_signal']:
                 break
-            while len(self.waiting_list) > 0:
+            while len(self.waiting_list) != 0:
                 if lib.common.FLAG['stop_signal']:
                     break
-                print '\r+ ' + self.waiting_list[0]
+                print('\r+ ' + self.waiting_list[0])
                 url_obj_to_be_checked = lib.urlentity.URLEntity(self.waiting_list[0])
                 while url_obj_to_be_checked.get_file().lower().endswith('png') or \
                         url_obj_to_be_checked.get_file().lower().endswith('jpg') or \
                         url_obj_to_be_checked.get_file().lower().endswith('bmp') or \
                         url_obj_to_be_checked.get_file().lower().endswith('gif'):
-                    self.waiting_list.pop(0)
+                    if self.waiting_list:
+                        self.waiting_list.pop(0)
+                    else:
+                        break
+
                 try:
                     r = requests.get(url=self.waiting_list[0])
                     soup = bs4.BeautifulSoup(r.text, 'html.parser')
-                except Exception, e:
-                    self.waiting_list.pop(0)
+                except Exception as e:
+                    if self.waiting_list:
+                        self.waiting_list.pop(0)
+                    else:
+                        break
                     continue
 
                 lib.common.CHECKER_OBJ.queue_add(url=self.waiting_list[0])

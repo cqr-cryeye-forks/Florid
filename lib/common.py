@@ -1,4 +1,5 @@
 # Configuration about the project and the current platform
+from __future__ import absolute_import
 import sys
 
 CONFIG = {

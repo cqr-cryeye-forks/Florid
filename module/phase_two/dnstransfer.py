@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import re
 import threading
@@ -54,4 +56,4 @@ def run(url):
 
 
 if __name__ == '__main__':
-    print domain_retrieve('http://www.whu.edu.cn/')
+    print(domain_retrieve('http://www.whu.edu.cn/'))

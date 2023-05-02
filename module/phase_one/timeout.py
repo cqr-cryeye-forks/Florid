@@ -1,7 +1,10 @@
+from __future__ import absolute_import
 import time
 
 import lib.common
 import lib.urlentity
+from six.moves import range
+from functools import reduce
 
 MODULE_NAME = 'timeout'
 
