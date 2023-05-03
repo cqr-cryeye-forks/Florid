@@ -3,6 +3,7 @@ import threading
 
 import lib.common
 import lib.urlentity
+from settings import ROOT_PATH
 
 MODULE_NAME = 'sensi_dir'
 
@@ -33,7 +34,8 @@ def run(url):
         target_url += (path_section + '/')
         target_url_list.append(target_url)
 
-    fp = open('./txt/dir_set.txt', 'r')
+    file_path = ROOT_PATH.joinpath("dir_set.txt")
+    fp = open(file_path, 'r')
     for __file in fp:
         if __file == '\n':
             continue
