@@ -34,7 +34,7 @@ def run(url):
         target_url += (path_section + '/')
         target_url_list.append(target_url)
 
-    file_path = ROOT_PATH.parent.joinpath("file_set.txt")
+    file_path = ROOT_PATH.joinpath("txt", "file_set.txt")
     fp = open(file_path, 'r')
     for __file in fp:
         if __file == '\n':
