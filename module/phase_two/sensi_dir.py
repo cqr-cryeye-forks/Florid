@@ -3,7 +3,6 @@ import threading
 
 import lib.common
 import lib.urlentity
-from six.moves import filter
 
 MODULE_NAME = 'sensi_dir'
 

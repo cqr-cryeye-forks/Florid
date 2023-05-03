@@ -1,7 +1,9 @@
 from __future__ import absolute_import
 from __future__ import print_function
 import os
-import six.moves.urllib.parse
+import urllib
+
+from urllib.parse import urljoin
 
 import bs4
 import requests
@@ -29,7 +31,7 @@ class Producer(object):
 
     def __find_joint(self, soup, tags, attribute):
         for tag in soup.find_all(tags):
-            url_new = six.moves.urllib.parse.urljoin(self.__source_url_obj.get_url(), tag.get(attribute))
+            url_new = urljoin(self.__source_url_obj.get_url(), tag.get(attribute))
             url_new_obj = lib.urlentity.URLEntity(url_new)
             if url_new_obj.get_url() not in self.crawled_list and url_new_obj.get_hostname() == self.__source_url_obj.get_hostname() and '#' not in url_new_obj.get_url():
                 self.waiting_list.append(url_new_obj.get_url())

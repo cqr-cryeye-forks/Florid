@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 import lib.common
 import lib.urlentity
-from six.moves import range
 
 MODULE_NAME = 'pathleak'
 
