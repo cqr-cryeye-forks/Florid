@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import lib.common
 
-MODULE_NAME = 'sample-1'
+MODULE_NAME = 'sample_1'
 
 
 def run():

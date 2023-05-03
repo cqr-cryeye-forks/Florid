@@ -5,7 +5,7 @@ import lib.common
 import lib.urlentity
 from six.moves import filter
 
-MODULE_NAME = 'sensi-dir'
+MODULE_NAME = 'sensi_dir'
 
 
 def init():

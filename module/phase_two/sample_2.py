@@ -3,7 +3,7 @@ import time
 
 import lib.common
 
-MODULE_NAME = 'sample-2'
+MODULE_NAME = 'sample_2'
 
 
 def init():

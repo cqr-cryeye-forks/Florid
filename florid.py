@@ -84,7 +84,6 @@ def florid_init(options):
 
 def florid_organize():
     core.importer.Importer().do_import()
-
     tasks = list([])
     # tasks.append(threading.Thread(target=lib.processbar.run, args=()))
     tasks.append(threading.Thread(target=core.producer.Producer(lib.common.SOURCE_URL).run, args=(), daemon=True))

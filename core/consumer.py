@@ -15,9 +15,10 @@ class Consumer(object):
         # That's why there is no URL as parameter.
         tasks_one = []
         for __module_name in lib.common.MODULE_ONE_OBJ_DICT:
-            t = threading.Thread(target=lib.common.MODULE_ONE_OBJ_DICT[__module_name].run, args=())
+
+            t = threading.Thread(target=lib.common.MODULE_ONE_OBJ_DICT[__module_name].run, args=(), daemon=True)
             tasks_one.append(t)
-            t.setDaemon(True)
+            # t.setDaemon(True)
             t.start()
         for _t in tasks_one:
             _t.join()
