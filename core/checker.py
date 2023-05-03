@@ -63,6 +63,7 @@ class ResultPrinter(object):
                     for __module_name in lib.common.MODULE_ONE_NAME_LIST:
                         one_finish_count += lib.common.ALIVE_LINE[__module_name]
                         # If the module's task is completed, the ALIVE_LINE value would be one.
+
                         # Else, it would be zero.
 
                     if one_finish_count == len(lib.common.MODULE_ONE_NAME_LIST):
