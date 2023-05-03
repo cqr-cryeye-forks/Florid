@@ -6,7 +6,7 @@ import platform
 import time
 
 import lib.common
-from six.moves import input
+# from six.moves import input
 
 NEEDED_MODULES = ['requests', 'bs4']
 
@@ -32,7 +32,7 @@ class Initializer:
             print('[!] Some necessary modules are needed:')
             for needed_module in self.__uninstalled_modules_list:
                 print('\t* %s' % needed_module)
-            input('Press [Enter] to install them.')
+            # input('Press [Enter] to install them.')
             for needed_module in self.__uninstalled_modules_list:
                 os.system('pip install %s' % needed_module)
             if lib.common.CONFIG['OS_type'] == 'WIN':
