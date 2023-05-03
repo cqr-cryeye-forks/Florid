@@ -2,7 +2,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import json
-import pathlib
 
 import config.config
 import lib.colorprint
