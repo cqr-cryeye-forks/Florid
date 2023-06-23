@@ -39,6 +39,7 @@ class Producer(object):
 
     def run(self):
         lib.colorprint.color().blue('[*] Scanning')
+        success_targets = []
         while not lib.common.FLAG['producer_done']:
             if lib.common.FLAG['stop_signal']:
                 break
@@ -58,13 +59,19 @@ class Producer(object):
 
                 try:
                     r = requests.get(url=self.waiting_list[0])
+                    x=1
                     soup = bs4.BeautifulSoup(r.text, 'html.parser')
+
+                    success_targets.append(self.waiting_list[0])
                 except Exception as e:
                     if self.waiting_list:
                         self.waiting_list.pop(0)
+
                     else:
                         break
                     continue
+
+
 
                 lib.common.CHECKER_OBJ.queue_add(url=self.waiting_list[0])
                 self.log_fp.writelines(self.waiting_list[0] + '\n')
@@ -76,6 +83,7 @@ class Producer(object):
             lib.colorprint.color().yellow('[*] ' + str(lib.common.CHECKER_OBJ.get_total_length()) + ' URLs Found',
                                           end='\n\n')
             lib.common.FLAG['producer_done'] = True
+
         self.log_fp.close()
 
 

@@ -2,11 +2,15 @@ from __future__ import absolute_import
 from __future__ import print_function
 import datetime
 import glob
+import json
 import optparse
 import pathlib
 import re
 import signal
 import threading
+
+import requests
+
 import core.initializer
 from settings import ROOT_PATH
 
@@ -56,6 +60,16 @@ def florid_get_parse():
 
 
 def florid_init(options):
+    # TODO: this is a temporary solution to validate the target, redo to something better
+    try:
+        requests.get(options.url)
+    except (ConnectionError, Exception) as error:
+        print(error)
+        file_path = ROOT_PATH.joinpath("result.json")
+        # write empty list to handle error (quick temporary solution)
+        file_path.write_text(json.dumps([]))
+        exit(1)
+
     lib.common.SOURCE_URL = lib.urlentity.URLEntity(options.url).get_url()
 
     modules_path_phase_one: pathlib.Path = ROOT_PATH.joinpath("module/phase_one")
