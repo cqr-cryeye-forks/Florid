@@ -70,9 +70,9 @@ class ResultPrinter(object):
 
                         longest_key = 0
                         Site_Info = lib.common.RESULT_ONE_DICT
-                        if "Ip Addr" not in Site_Info:
+                        if "Ip_Addr" not in Site_Info:
                             Site_Info.update({"Ip Addr": "Not defined"})
-                        if "IP Info" not in Site_Info:
+                        if "IP_Info" not in Site_Info:
                             Site_Info.update({"IP Info": "Not defined"})
                         if "X-Powered-By" not in Site_Info:
                             Site_Info.update({"X-Powered-By": "Not defined"})
