@@ -108,9 +108,12 @@ class ResultPrinter(object):
                             x = 1
                             context = lib.common.RESULT_DICT[__module_name]
                             ResultPrinter.FINAL_RESULT.append({
-                                "module_name": __module_name,
-                                "files": context,
+                                __module_name: [{"file": file} for file in context],
                             })
+                            # ResultPrinter.FINAL_RESULT.append({
+                            #     "module_name": __module_name,
+                            #     "files": context,
+                            # })
                             for item in lib.common.RESULT_DICT[__module_name]:
                                 lib.colorprint.color().green('\t> ' + item)
                             print()
