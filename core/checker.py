@@ -36,7 +36,7 @@ class Checker(object):
 
 
 class ResultPrinter(object):
-    FINAL_RESULT = []
+    FINAL_RESULT = {}
 
     def __init__(self):
         self.all_module_list = lib.common.MODULE_NAME_LIST
@@ -80,9 +80,7 @@ class ResultPrinter(object):
                             Site_Info.update({"Server": "Not defined"})
 
                         # NEW
-                        ResultPrinter.FINAL_RESULT.append({
-                            "Site_Info": Site_Info,
-                        })
+                        ResultPrinter.FINAL_RESULT["Site_Info"] = Site_Info
 
                         for __key in lib.common.RESULT_ONE_DICT:
                             longest_key = max(longest_key, len(__key))
@@ -107,9 +105,7 @@ class ResultPrinter(object):
                             # ResultPrinter.FINAL_RESULT.append(tests_info)
                             x = 1
                             context = lib.common.RESULT_DICT[__module_name]
-                            ResultPrinter.FINAL_RESULT.append({
-                                __module_name: [{"file": file} for file in context],
-                            })
+                            ResultPrinter.FINAL_RESULT[__module_name] = [{"file": file} for file in context]
                             # ResultPrinter.FINAL_RESULT.append({
                             #     "module_name": __module_name,
                             #     "files": context,
