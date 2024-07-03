@@ -8,6 +8,7 @@ import pathlib
 import re
 import signal
 import threading
+import time
 
 import requests
 
@@ -131,8 +132,11 @@ def florid_exit(signum, frame):
 
 
 if __name__ == '__main__':
+    time_start = time.time()
     signal.signal(signal.SIGINT, florid_exit)
     signal.signal(signal.SIGTERM, florid_exit)
     # florid_show_banner()
     florid_init(florid_get_parse())
     florid_organize()
+    time_end = time.time()
+    print(f"{int((time_end - time_start) / 60)}:{int((time_end - time_start) % 60)} минут прошло")
