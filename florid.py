@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
+
 import datetime
-import glob
 import json
 import optparse
 import pathlib
@@ -47,8 +47,9 @@ def florid_show_banner():
 
 def florid_get_parse():
     parser = optparse.OptionParser()
-    parser.add_option('-u', action='store', dest='url', help='Target URL')
-    parser.add_option('-m', action='store', dest='modules', help='Modules to be included')
+    parser.add_option('--url', action='store', help='Target URL')
+    parser.add_option('--modules', action='store', help='Modules to be included')
+    parser.add_option('--output', action='store', help='output file to save result in json format')
 
     (options, args) = parser.parse_args()
 
@@ -65,22 +66,28 @@ def florid_init(options):
         requests.get(options.url)
     except (ConnectionError, Exception) as error:
         print(error)
-        file_path = ROOT_PATH.joinpath("result.json")
+        file_path = ROOT_PATH.joinpath(options.output)
         # write empty list to handle error (quick temporary solution)
-        file_path.write_text(json.dumps([]))
+        result = {
+            "Empty": "Nothing found by Florid",
+            "Error": error,
+        }
+        with open(file_path, "w") as jf:
+            json.dump(result, jf, indent=2)
         exit(1)
 
     lib.common.SOURCE_URL = lib.urlentity.URLEntity(options.url).get_url()
+    pattern = r'.*[/\\](.+)\.py$'
 
     modules_path_phase_one: pathlib.Path = ROOT_PATH.joinpath("module/phase_one")
     modules_path_phase_two: pathlib.Path = ROOT_PATH.joinpath("module/phase_two")
     for __file_name in modules_path_phase_one.iterdir():
-    # for __file_name in glob.glob('module/phase_one/*.py'):
+        # for __file_name in glob.glob('module/phase_one/*.py'):
         name_of_file: str = str(__file_name)
         __file_name = name_of_file
         if '__init__' not in __file_name and 'pyc' not in __file_name:
             lib.common.MODULE_ONE_NAME_LIST.append(
-                re.findall('.*(/|\\\\)(.+)\.py$', __file_name)[0][1])
+                re.findall(pattern, __file_name)[0][1])
 
     if options.modules.lower() == 'all':
 
@@ -89,7 +96,7 @@ def florid_init(options):
             __file_name = name_of_file
             if '__init__' not in __file_name and 'pyc' not in __file_name:
                 lib.common.MODULE_NAME_LIST.append(
-                    re.findall('.*(/|\\\\)(.+)\.py$', __file_name)[0][1])
+                    re.findall(pattern, __file_name)[0][1])
     else:
         if options.modules != '':
             for __file_name in options.modules.replace(' ', '').split(','):
@@ -126,6 +133,6 @@ def florid_exit(signum, frame):
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, florid_exit)
     signal.signal(signal.SIGTERM, florid_exit)
-    florid_show_banner()
+    # florid_show_banner()
     florid_init(florid_get_parse())
     florid_organize()
