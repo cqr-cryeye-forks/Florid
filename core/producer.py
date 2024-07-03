@@ -1,39 +1,38 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, print_function
+
 import os
-import urllib
-
 from urllib.parse import urljoin
-
 import bs4
 import requests
-
 import lib.colorprint
 import lib.common
 import lib.urlentity
 
 
-class Producer(object):
+class Producer:
     def __init__(self, source_url):
         self.__source_url_obj = lib.urlentity.URLEntity(source_url)
-
         self.waiting_list = [self.__source_url_obj.get_url()]
         self.crawled_list = [self.__source_url_obj.get_url()]
 
-        # Create the directory for log files such as the list of urls
-        if not os.path.exists(lib.common.CONFIG['project_path'] + '/log/' + self.__source_url_obj.get_hostname()):
+        # Create the directory for log files such as the list of URLs
+        log_dir = os.path.join(lib.common.CONFIG['project_path'], 'log', self.__source_url_obj.get_hostname())
+        if not os.path.exists(log_dir):
             try:
-                os.makedirs(lib.common.CONFIG['project_path'] + '/log/' + self.__source_url_obj.get_hostname())
+                os.makedirs(log_dir)
             except Exception as e:
-                print('Creating Log File Fail.')
-        self.log_fp = open(
-            lib.common.CONFIG['project_path'] + '/log/' + self.__source_url_obj.get_hostname() + '/urllist.txt', 'w+')
+                print('Creating Log File Failed:', e)
+
+        self.log_fp = open(os.path.join(log_dir, 'urllist.txt'), 'w+')
 
     def __find_joint(self, soup, tags, attribute):
+        """Finds new URLs from the given soup object and adds them to the waiting and crawled lists."""
         for tag in soup.find_all(tags):
             url_new = urljoin(self.__source_url_obj.get_url(), tag.get(attribute))
             url_new_obj = lib.urlentity.URLEntity(url_new)
-            if url_new_obj.get_url() not in self.crawled_list and url_new_obj.get_hostname() == self.__source_url_obj.get_hostname() and '#' not in url_new_obj.get_url():
+            if (url_new_obj.get_url() not in self.crawled_list and
+                    url_new_obj.get_hostname() == self.__source_url_obj.get_hostname() and
+                    '#' not in url_new_obj.get_url()):
                 self.waiting_list.append(url_new_obj.get_url())
                 self.crawled_list.append(url_new_obj.get_url())
 
@@ -43,49 +42,44 @@ class Producer(object):
         while not lib.common.FLAG['producer_done']:
             if lib.common.FLAG['stop_signal']:
                 break
-            while len(self.waiting_list) != 0:
+
+            while self.waiting_list:
                 if lib.common.FLAG['stop_signal']:
                     break
+
                 print('\r+ ' + self.waiting_list[0])
                 url_obj_to_be_checked = lib.urlentity.URLEntity(self.waiting_list[0])
-                while url_obj_to_be_checked.get_file().lower().endswith('png') or \
-                        url_obj_to_be_checked.get_file().lower().endswith('jpg') or \
-                        url_obj_to_be_checked.get_file().lower().endswith('bmp') or \
-                        url_obj_to_be_checked.get_file().lower().endswith('gif'):
+
+                # Skip certain file types
+                while url_obj_to_be_checked.get_file().lower().endswith(('png', 'jpg', 'bmp', 'gif')):
                     if self.waiting_list:
                         self.waiting_list.pop(0)
                     else:
                         break
 
                 try:
-                    r = requests.get(url=self.waiting_list[0])
-                    x=1
-                    soup = bs4.BeautifulSoup(r.text, 'html.parser')
-
+                    response = requests.get(url=self.waiting_list[0])
+                    soup = bs4.BeautifulSoup(response.text, 'html.parser')
                     success_targets.append(self.waiting_list[0])
                 except Exception as e:
-                    if self.waiting_list:
-                        self.waiting_list.pop(0)
-
-                    else:
-                        break
+                    print(f"Request failed for {self.waiting_list[0]}: {e}")
+                    self.waiting_list.pop(0)
                     continue
 
-
-
                 lib.common.CHECKER_OBJ.queue_add(url=self.waiting_list[0])
-                self.log_fp.writelines(self.waiting_list[0] + '\n')
+                self.log_fp.write(self.waiting_list[0] + '\n')
                 self.waiting_list.pop(0)
 
-                self.__find_joint(soup=soup, tags='a', attribute='href')
-                self.__find_joint(soup=soup, tags='form', attribute='action')
-                self.__find_joint(soup=soup, tags='link', attribute='href')
-            lib.colorprint.color().yellow('[*] ' + str(lib.common.CHECKER_OBJ.get_total_length()) + ' URLs Found',
-                                          end='\n\n')
+                # Find new URLs from the current page
+                self.__find_joint(soup, tags='a', attribute='href')
+                self.__find_joint(soup, tags='form', attribute='action')
+                self.__find_joint(soup, tags='link', attribute='href')
+
+            lib.colorprint.color().yellow('[*] ' + str(lib.common.CHECKER_OBJ.get_total_length()) + ' URLs Found')
             lib.common.FLAG['producer_done'] = True
 
         self.log_fp.close()
 
 
 if __name__ == '__main__':
-    producer = Producer('http://testphp.vulnweb.com/').run()
+    Producer('http://testphp.vulnweb.com/').run()

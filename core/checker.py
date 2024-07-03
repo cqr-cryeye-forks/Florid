@@ -1,17 +1,14 @@
-from __future__ import absolute_import
-from __future__ import print_function
-
+from __future__ import absolute_import, print_function
 import json
-
 import config.config
 import lib.colorprint
 import lib.common
 from settings import ROOT_PATH
 
 
-class Checker(object):
-    # It's just a object to handle the URLs.
-    # It works as a queue handler.
+class Checker:
+    """A class to handle the URLs, works as a queue handler."""
+
     def __init__(self):
         self.url_queue = []
         self.count_elements = 0
@@ -21,8 +18,7 @@ class Checker(object):
         self.count_elements += 1
 
     def queue_pop(self):
-        url = self.url_queue[0]
-        self.url_queue.pop(0)
+        url = self.url_queue.pop(0)
         return url
 
     def get_producer_state(self):
@@ -35,7 +31,7 @@ class Checker(object):
         return self.count_elements
 
 
-class ResultPrinter(object):
+class ResultPrinter:
     FINAL_RESULT = {}
 
     def __init__(self):
@@ -43,80 +39,70 @@ class ResultPrinter(object):
         self.phase_one_printed = False
 
     def run(self):
+        """Check and print results while modules are left to be executed."""
 
-        # Do checking while modules left to be executed.
-        while len(self.all_module_list) != 0:
+        while self.all_module_list:
+            # Stop if configuration dictates exit without result and stop signal is set
+            if config.config.config.get('exit_without_result') and lib.common.FLAG['stop_signal']:
+                break
 
-            # If it finds the signal of stop, just stop.
-            # It's based on the configuration.
-            if config.config.config['exit_without_result']:
-                if lib.common.FLAG['stop_signal']:
-                    break
-
-            # Wait until the producer's task is finished.
-            # Or it will begin to check when there is no result
+            # Wait until the producer's task is finished
             if lib.common.FLAG['producer_done']:
-                # Print the result of modules in phase one if it's not printed.
+                # Print phase one results if not printed
                 if not self.phase_one_printed:
-                    one_finish_count = 0
-                    for __module_name in lib.common.MODULE_ONE_NAME_LIST:
-                        one_finish_count += lib.common.ALIVE_LINE[__module_name]
-                        # If the module's task is completed, the ALIVE_LINE value would be one.
-
-                        # Else, it would be zero.
+                    one_finish_count = sum(
+                        lib.common.ALIVE_LINE.get(module, 0) for module in lib.common.MODULE_ONE_NAME_LIST)
 
                     if one_finish_count == len(lib.common.MODULE_ONE_NAME_LIST):
-                        lib.colorprint.color().sky_blue('[====\t' + 'Site Info'.ljust(14) + '====]')
-
-                        longest_key = 0
-                        Site_Info = lib.common.RESULT_ONE_DICT
-                        if "Ip_Addr" not in Site_Info:
-                            Site_Info.update({"Ip_Addr": "Not defined"})
-                        if "IP_Info" not in Site_Info:
-                            Site_Info.update({"IP_Info": "Not defined"})
-                        if "X-Powered-By" not in Site_Info:
-                            Site_Info.update({"X-Powered-By": "Not defined"})
-                        if "Server" not in Site_Info:
-                            Site_Info.update({"Server": "Not defined"})
-
-                        # NEW
-                        ResultPrinter.FINAL_RESULT["Site_Info"] = Site_Info
-
-                        for __key in lib.common.RESULT_ONE_DICT:
-                            longest_key = max(longest_key, len(__key))
-                        for __key in lib.common.RESULT_ONE_DICT:
-                            print((__key + ': ').ljust(longest_key + 2) + lib.common.RESULT_ONE_DICT[__key])
+                        self._print_phase_one_results()
                         self.phase_one_printed = True
-                        print()
 
-                # The printing process for modules in phase one is completed.
-                # Now it's time to print the results for modules in phase two.
+                # Print phase two results
                 if self.phase_one_printed:
-                    for __module_name in self.all_module_list:
-                        if lib.common.ALIVE_LINE[__module_name] >= 0:
-                            title = '[====\t' + __module_name.ljust(14) + '====]'
-                            lib.colorprint.color().sky_blue(title)
-                            self.all_module_list.remove(__module_name)
-                            # Result of the certain module has been printed.
-                            # Remove this module from the list.
+                    self._print_phase_two_results()
 
-                            # NEW
-                            # tests_info = lib.common.RESULT_DICT
-                            # ResultPrinter.FINAL_RESULT.append(tests_info)
-                            x = 1
-                            context = lib.common.RESULT_DICT[__module_name]
-                            ResultPrinter.FINAL_RESULT[__module_name] = [{"file": file} for file in context]
-                            # ResultPrinter.FINAL_RESULT.append({
-                            #     "module_name": __module_name,
-                            #     "files": context,
-                            # })
-                            for item in lib.common.RESULT_DICT[__module_name]:
-                                lib.colorprint.color().green('\t> ' + item)
-                            print()
-
+        # Handle stop signal
         if lib.common.FLAG['stop_signal']:
-            lib.colorprint.color().yellow('[!] User abort. Results may be not completed.')
+            lib.colorprint.color().yellow('[!] User abort. Results may be incomplete.')
 
-        file_path = ROOT_PATH.joinpath("result.json")
-        file_path.write_text(json.dumps(ResultPrinter.FINAL_RESULT))
+        # Save results to file
+        self._save_results()
+
         lib.common.FLAG['scan_done'] = True
+
+    def _print_phase_one_results(self):
+        lib.colorprint.color().sky_blue('[====\t' + 'Site Info'.ljust(14) + '====]')
+        Site_Info = lib.common.RESULT_ONE_DICT
+
+        for key in ["Ip_Addr", "IP_Info", "X-Powered-By", "Server"]:
+            Site_Info.setdefault(key, "Not defined")
+
+        ResultPrinter.FINAL_RESULT["Site_Info"] = Site_Info
+
+        longest_key = max(len(key) for key in Site_Info)
+        for key, value in Site_Info.items():
+            print((key + ': ').ljust(longest_key + 2) + value)
+        print()
+
+    def _print_phase_two_results(self):
+        for module_name in self.all_module_list[:]:
+            if lib.common.ALIVE_LINE.get(module_name, -1) >= 0:
+                title = '[====\t' + module_name.ljust(14) + '====]'
+                lib.colorprint.color().sky_blue(title)
+                self.all_module_list.remove(module_name)
+
+                context = lib.common.RESULT_DICT.get(module_name, [])
+                ResultPrinter.FINAL_RESULT[module_name] = [{"file": file} for file in context]
+
+                for item in context:
+                    lib.colorprint.color().green('\t> ' + item)
+                print()
+
+    def _save_results(self):
+        file_path = ROOT_PATH.joinpath("result.json")
+        file_path.write_text(json.dumps(ResultPrinter.FINAL_RESULT, indent=4))
+
+# Example usage:
+# checker = Checker()
+# result_printer = ResultPrinter()
+# result_printer.run()
