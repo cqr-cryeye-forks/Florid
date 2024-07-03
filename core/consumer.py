@@ -28,7 +28,6 @@ class Consumer(object):
         # while printer still needs to work due to the items in the Checker queue.
         while not lib.common.CHECKER_OBJ.get_producer_state() or lib.common.CHECKER_OBJ.get_queue_length() > 0:
             # Break immediately? Due to the config.py
-            print(lib.common.CHECKER_OBJ.get_queue_length())
             if config.config.config['exit_without_result']:
                 if lib.common.FLAG['stop_signal']:
                     print("[*] Stop signal received, exiting...")

@@ -39,7 +39,6 @@ class ResultPrinter:
         self.phase_one_printed = False
 
     def run(self):
-        """Check and print results while modules are left to be executed."""
 
         while self.all_module_list:
             # Stop if configuration dictates exit without result and stop signal is set
@@ -101,8 +100,4 @@ class ResultPrinter:
     def _save_results(self):
         file_path = ROOT_PATH.joinpath("result.json")
         file_path.write_text(json.dumps(ResultPrinter.FINAL_RESULT, indent=4))
-
-# Example usage:
-# checker = Checker()
-# result_printer = ResultPrinter()
-# result_printer.run()
+        lib.common.FLAG['scan_done'] = True
