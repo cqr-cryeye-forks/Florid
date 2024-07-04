@@ -1,5 +1,7 @@
 from __future__ import absolute_import, print_function
 import json
+import time
+
 import config.config
 import lib.colorprint
 import lib.common
@@ -44,21 +46,28 @@ class ResultPrinter:
             # Stop if configuration dictates exit without result and stop signal is set
             if config.config.config.get('exit_without_result') and lib.common.FLAG['stop_signal']:
                 break
-
             # Wait until the producer's task is finished
             if lib.common.FLAG['producer_done']:
+                print(222)
+                time.sleep(0.06)
                 # Print phase one results if not printed
                 if not self.phase_one_printed:
                     one_finish_count = sum(
                         lib.common.ALIVE_LINE.get(module, 0) for module in lib.common.MODULE_ONE_NAME_LIST)
-
+                    print(333)
+                    time.sleep(0.06)
                     if one_finish_count == len(lib.common.MODULE_ONE_NAME_LIST):
                         self._print_phase_one_results()
                         self.phase_one_printed = True
+                        print(444)
+                        time.sleep(0.06)
 
                 # Print phase two results
                 if self.phase_one_printed:
                     self._print_phase_two_results()
+                    print(555)
+                    time.sleep(0.06)
+        print(666)
 
         # Handle stop signal
         if lib.common.FLAG['stop_signal']:
